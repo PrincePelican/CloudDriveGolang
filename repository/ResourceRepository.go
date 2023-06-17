@@ -1,6 +1,7 @@
 package repository
 
 import (
+	dto "cloud-service/DTO"
 	"cloud-service/entity"
 	"database/sql"
 	"log"
@@ -36,4 +37,12 @@ func (r *ResourceRepository) GetAll() ([]entity.ResourceEntity, error) {
 	}
 
 	return resources, nil
+}
+
+func (r *ResourceRepository) ChangeResource(dto dto.ResourceDTO, id int64) error {
+	_, err := r.db.Query("UPDATE RESOURCES SET name = $1, path = $2, modification_date = $3 WHERE id = $4", dto.Name, dto.Path, dto.ModificationDate, id)
+	if err != nil {
+		log.Fatalf("Query error : %s", err)
+	}
+	return nil
 }

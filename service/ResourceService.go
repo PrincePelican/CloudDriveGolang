@@ -1,9 +1,11 @@
 package service
 
 import (
+	dto "cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/repository"
 	"log"
+	"time"
 )
 
 type ResourceService struct {
@@ -27,4 +29,15 @@ func (service ResourceService) GetAll() ([]entity.ResourceEntity, error) {
 	}
 
 	return data, nil
+}
+
+func (service ResourceService) ChangeResource(dto dto.ResourceDTO, id int64) error {
+
+	dto.ModificationDate = time.Now()
+	err := service.resourceRepository.ChangeResource(dto, id)
+	if err != nil {
+		log.Fatalf("Query error : %s", err)
+	}
+
+	return nil
 }
