@@ -25,7 +25,7 @@ func (service ResourceService) CreateResource() error {
 func (service ResourceService) GetAll() ([]entity.ResourceEntity, error) {
 	data, err := service.resourceRepository.GetAll()
 	if err != nil {
-		log.Fatalf("error %s", err)
+		log.Fatalf("Service error %s", err)
 	}
 
 	return data, nil
@@ -36,7 +36,7 @@ func (service ResourceService) ChangeResource(dto dto.ResourceDTO, id int64) err
 	dto.ModificationDate = time.Now()
 	err := service.resourceRepository.ChangeResource(dto, id)
 	if err != nil {
-		log.Fatalf("Query error : %s", err)
+		log.Fatalf("Service error : %s", err)
 	}
 
 	return nil

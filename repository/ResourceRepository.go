@@ -20,7 +20,7 @@ func NewResourceRepository(db *sql.DB) *ResourceRepository {
 func (r *ResourceRepository) GetAll() ([]entity.ResourceEntity, error) {
 	data, err := r.db.Query("SELECT * FROM RESOURCES")
 	if err != nil {
-		log.Fatalf("Query error : %s", err)
+		log.Fatalf("ResourceRepository query error : %s", err)
 	}
 
 	var resources []entity.ResourceEntity
@@ -42,7 +42,7 @@ func (r *ResourceRepository) GetAll() ([]entity.ResourceEntity, error) {
 func (r *ResourceRepository) ChangeResource(dto dto.ResourceDTO, id int64) error {
 	_, err := r.db.Query("UPDATE RESOURCES SET name = $1, path = $2, modification_date = $3 WHERE id = $4", dto.Name, dto.Path, dto.ModificationDate, id)
 	if err != nil {
-		log.Fatalf("Query error : %s", err)
+		log.Fatalf("ResourceRepository query error : %s", err)
 	}
 	return nil
 }
