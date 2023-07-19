@@ -1,48 +1,43 @@
 package repository
 
 import (
-	dto "cloud-service/DTO"
 	"cloud-service/entity"
-	"database/sql"
-	"log"
+	"fmt"
+
+	"gorm.io/gorm"
 )
 
 type ResourceRepository struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
-func NewResourceRepository(db *sql.DB) *ResourceRepository {
+func NewResourceRepository(db *gorm.DB) *ResourceRepository {
 	return &ResourceRepository{
 		db: db,
 	}
 }
 
+func (r *ResourceRepository) CreateNewResource(entity entity.ResourceEntity) ([]entity.ResourceEntity, error) {
+	result := r.db.Create(&entity)
+
+	fmt.Print(result.RowsAffected)
+
+	return nil, nil
+}
+
 func (r *ResourceRepository) GetAll() ([]entity.ResourceEntity, error) {
-	data, err := r.db.Query("SELECT * FROM RESOURCES")
-	if err != nil {
-		log.Fatalf("ResourceRepository query error : %s", err)
-	}
-
 	var resources []entity.ResourceEntity
-
-	for data.Next() {
-		var rsc entity.ResourceEntity
-
-		if err := data.Scan(&rsc.ID, &rsc.Name, &rsc.Path,
-			&rsc.ResourceType, &rsc.Size, &rsc.ModificationDate, &rsc.ParentId); err != nil {
-			log.Fatalf("Scan data error : %s", err)
-		}
-
-		resources = append(resources, rsc)
-	}
-
+	r.db.Find(&resources)
 	return resources, nil
 }
 
-func (r *ResourceRepository) ChangeResource(dto dto.ResourceDTO, id int64) error {
-	_, err := r.db.Query("UPDATE RESOURCES SET name = $1, path = $2, modification_date = $3 WHERE id = $4", dto.Name, dto.Path, dto.ModificationDate, id)
-	if err != nil {
-		log.Fatalf("ResourceRepository query error : %s", err)
-	}
+func (r *ResourceRepository) ChangeResource(entity entity.ResourceEntity, id uint64) error {
+	r.db.Save(entity)
+
+	return nil
+}
+
+func (r *ResourceRepository) DeleteResource(id uint64) error {
+	r.db.Delete(&entity.ResourceEntity{}, id)
 	return nil
 }

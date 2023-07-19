@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 type ResourceType uint
 
@@ -9,12 +11,15 @@ const (
 	Container ResourceType = 1
 )
 
+func (ResourceEntity) TableName() string {
+	return "resources"
+}
+
 type ResourceEntity struct {
-	ID               int64        `json:"id"`
-	Name             string       `json:"name"`
-	Path             string       `json:"path"`
-	ResourceType     ResourceType `json:"resourceType"`
-	Size             int64        `json:"size"`
-	ModificationDate time.Time    `json:"modificationDate"`
-	ParentId         int32        `json:"parentId"`
+	gorm.Model
+	Name         string       `json:"name"`
+	Path         string       `json:"path" gorm:"unique"`
+	ResourceType ResourceType `json:"resourceType"`
+	Size         int64        `json:"size"`
+	ParentId     int32        `json:"parentId"`
 }

@@ -1,11 +1,9 @@
 package service
 
 import (
-	dto "cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/repository"
 	"log"
-	"time"
 )
 
 type ResourceService struct {
@@ -18,7 +16,9 @@ func NewResourceService(resourceRepository repository.ResourceRepository) *Resou
 	}
 }
 
-func (service ResourceService) CreateResource() error {
+func (service ResourceService) CreateResource(entity entity.ResourceEntity) error {
+	service.resourceRepository.CreateNewResource(entity)
+
 	return nil
 }
 
@@ -31,13 +31,16 @@ func (service ResourceService) GetAll() ([]entity.ResourceEntity, error) {
 	return data, nil
 }
 
-func (service ResourceService) ChangeResource(dto dto.ResourceDTO, id int64) error {
-
-	dto.ModificationDate = time.Now()
-	err := service.resourceRepository.ChangeResource(dto, id)
+func (service ResourceService) ChangeResource(entity entity.ResourceEntity, id uint64) error {
+	err := service.resourceRepository.ChangeResource(entity, id)
 	if err != nil {
 		log.Fatalf("Service error : %s", err)
 	}
 
+	return nil
+}
+
+func (service ResourceService) DeleteResource(id uint64) error {
+	service.resourceRepository.DeleteResource(id)
 	return nil
 }
