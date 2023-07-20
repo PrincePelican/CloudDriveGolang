@@ -1,6 +1,7 @@
 package controller
 
 import (
+	formdata "cloud-service/FormData"
 	"cloud-service/entity"
 	"cloud-service/service"
 	"log"
@@ -23,27 +24,40 @@ func NewResourceController(resourceService service.ResourceService, router *gin.
 }
 
 func (ctr ResourceController) InitRoutes() {
-	ctr.router.GET("/resources/all", ctr.getAll)
+	ctr.router.GET("/resources/all", ctr.getAllResource)
+	ctr.router.GET("/resources/:id", ctr.getResourceById)
 	ctr.router.PUT("/resources/change/:id", ctr.PutResourceChange)
 	ctr.router.POST("/resources/create", ctr.createNewResource)
 	ctr.router.DELETE("/resources/delete/:id", ctr.DeleteById)
 }
 
 func (ctr ResourceController) createNewResource(c *gin.Context) {
-	var newResource entity.ResourceEntity
-	if err := c.BindJSON(&newResource); err != nil {
+	var newResource formdata.FileCreateForm
+	if err := c.ShouldBind(&newResource); err != nil {
 		log.Fatalf("error bind %s", err)
 	}
 
 	ctr.resourceService.CreateResource(newResource)
+
+	c.IndentedJSON(http.StatusCreated, gin.H{"message": "File Uploaded"})
 }
 
-func (ctr ResourceController) getAll(c *gin.Context) {
+func (ctr ResourceController) getAllResource(c *gin.Context) {
 	data, err := ctr.resourceService.GetAll()
 	if err != nil {
 		log.Fatalf("error %s", err)
 	}
 	c.IndentedJSON(http.StatusOK, data)
+}
+
+func (ctr ResourceController) getResourceById(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		log.Fatalf("error id %s", err)
+	}
+	ctr.resourceService.GetResourceById(id)
+
+	c.IndentedJSON(http.StatusOK, id)
 }
 
 func (ctr ResourceController) PutResourceChange(c *gin.Context) {
@@ -60,7 +74,7 @@ func (ctr ResourceController) PutResourceChange(c *gin.Context) {
 		log.Fatalf("error %s", err)
 	}
 
-	c.IndentedJSON(http.StatusAccepted, gin.H{"message": "Data changed"})
+	c.IndentedJSON(http.StatusAccepted, gin.H{"message": "File changed"})
 }
 
 func (ctr ResourceController) DeleteById(c *gin.Context) {
@@ -70,4 +84,6 @@ func (ctr ResourceController) DeleteById(c *gin.Context) {
 	}
 
 	ctr.resourceService.DeleteResource(id)
+
+	c.IndentedJSON(http.StatusOK, gin.H{"message": "File deleted"})
 }

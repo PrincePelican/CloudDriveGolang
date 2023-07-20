@@ -1,6 +1,7 @@
 package service
 
 import (
+	"cloud-service/entity"
 	"fmt"
 	"io"
 	"log"
@@ -42,10 +43,10 @@ func (s *StorageService) UplodadFileToBucket(file io.Reader, key string) {
 
 }
 
-func (s *StorageService) DownloadFileFromBucket(key string) {
+func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) *os.File {
 	downloader := s3manager.NewDownloader(s.session)
 
-	file, err := os.Create("pobrany.txt")
+	file, err := os.Create(resource.Name)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -55,13 +56,15 @@ func (s *StorageService) DownloadFileFromBucket(key string) {
 	result, err := downloader.Download(file,
 		&s3.GetObjectInput{
 			Bucket: aws.String("cloudgodrivebucket"),
-			Key:    aws.String(key),
+			Key:    aws.String(resource.Key),
 		})
 	if err != nil {
 		log.Fatalf("Download error %s", err)
 	}
 
-	fmt.Println("Downloaded", file.Name(), result, "bytes")
+	fmt.Println("Downloaded %d bytes", result)
+
+	return file
 }
 
 func (s *StorageService) DeleteFileFromBucket(key string) {

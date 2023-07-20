@@ -17,6 +17,13 @@ func NewResourceRepository(db *gorm.DB) *ResourceRepository {
 	}
 }
 
+func (r *ResourceRepository) GetResourceById(id uint64) entity.ResourceEntity {
+	var resource entity.ResourceEntity
+	r.db.Where("id = ?", id).First(&resource)
+
+	return resource
+}
+
 func (r *ResourceRepository) CreateNewResource(entity entity.ResourceEntity) ([]entity.ResourceEntity, error) {
 	result := r.db.Create(&entity)
 
