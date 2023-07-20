@@ -26,6 +26,7 @@ func (service ResourceService) CreateResource(resource formdata.FileCreateForm) 
 
 	entity.Key = (uuid.New()).String()
 	entity.Name = resource.File.Filename
+	entity.Size = resource.File.Size
 
 	file, err := resource.File.Open()
 	if err != nil {

@@ -62,7 +62,7 @@ func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) 
 		log.Fatalf("Download error %s", err)
 	}
 
-	fmt.Println("Downloaded %d bytes", result)
+	fmt.Println("Downloaded bytes", result)
 
 	return file
 }
