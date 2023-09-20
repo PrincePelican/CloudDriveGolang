@@ -40,7 +40,6 @@ func (s *StorageService) UplodadFileToBucket(file io.Reader, key string) {
 	}
 
 	fmt.Print(result)
-
 }
 
 func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) *os.File {
@@ -61,7 +60,6 @@ func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) 
 	if err != nil {
 		log.Fatalf("Download error %s", err)
 	}
-
 	fmt.Println("Downloaded bytes", result)
 
 	return file

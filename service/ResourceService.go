@@ -1,10 +1,11 @@
 package service
 
 import (
-	formdata "cloud-service/FormData"
+	"cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/repository"
 	"log"
+	"os"
 
 	"github.com/google/uuid"
 )
@@ -21,30 +22,33 @@ func NewResourceService(resourceRepository repository.ResourceRepository, storag
 	}
 }
 
-func (service ResourceService) CreateResource(resource formdata.FileCreateForm) error {
-	var entity entity.ResourceEntity = resource.Resource
+func (service ResourceService) UploadResources(resource DTO.FileCreateForm) error {
+	var entity entity.ResourceEntity
 
-	entity.Key = (uuid.New()).String()
-	entity.Name = resource.File.Filename
-	entity.Size = resource.File.Size
+	for _, x := range resource.File {
 
-	file, err := resource.File.Open()
-	if err != nil {
-		log.Fatalf("File open error %s", err)
+		entity.Key = (uuid.New()).String()
+		entity.Name = x.Filename
+		entity.Size = x.Size
+
+		file, err := x.Open()
+		if err != nil {
+			log.Fatalf("File open error %s", err)
+		}
+
+		service.storageService.UplodadFileToBucket(file, entity.Key)
+		service.resourceRepository.CreateNewResource(entity)
 	}
-
-	service.storageService.UplodadFileToBucket(file, entity.Key)
-	service.resourceRepository.CreateNewResource(entity)
 
 	return nil
 }
 
-func (service ResourceService) GetResourceById(id uint64) error {
+func (service ResourceService) GetResourceById(id uint64) (*os.File, error) {
 	resource := service.resourceRepository.GetResourceById(id)
 
-	service.storageService.DownloadFileFromBucket(resource)
+	file := service.storageService.DownloadFileFromBucket(resource)
 
-	return nil
+	return file, nil
 }
 
 func (service ResourceService) GetAll() ([]entity.ResourceEntity, error) {

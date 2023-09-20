@@ -1,7 +1,7 @@
 package controller
 
 import (
-	formdata "cloud-service/FormData"
+	"cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/service"
 	"log"
@@ -32,12 +32,12 @@ func (ctr ResourceController) InitRoutes() {
 }
 
 func (ctr ResourceController) createNewResource(c *gin.Context) {
-	var newResource formdata.FileCreateForm
+	var newResource DTO.FileCreateForm
 	if err := c.ShouldBind(&newResource); err != nil {
 		log.Fatalf("error bind %s", err)
 	}
 
-	ctr.resourceService.CreateResource(newResource)
+	ctr.resourceService.UploadResources(newResource)
 
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": "File Uploaded"})
 }
@@ -55,9 +55,14 @@ func (ctr ResourceController) getResourceById(c *gin.Context) {
 	if err != nil {
 		log.Fatalf("error id %s", err)
 	}
-	ctr.resourceService.GetResourceById(id)
+	file, err := ctr.resourceService.GetResourceById(id)
+	if err != nil {
+		log.Fatalf("error %s", err)
+	}
 
-	c.IndentedJSON(http.StatusOK, id)
+	c.Header("Content-Disposition", "attachment; filename="+file.Name())
+	c.Header("Content-Type", "application/octet-stream")
+	c.File(file.Name())
 }
 
 func (ctr ResourceController) PutResourceChange(c *gin.Context) {
