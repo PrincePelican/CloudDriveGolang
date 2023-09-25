@@ -3,12 +3,14 @@ package DTO
 import "fmt"
 
 type DirectoryNode struct {
-	nodes map[string]*DirectoryNode
+	Name  string
+	Nodes map[string]*DirectoryNode
 }
 
-func NewDirectoryNode() *DirectoryNode {
+func NewDirectoryNode(name string) *DirectoryNode {
 	return &DirectoryNode{
-		nodes: make(map[string]*DirectoryNode),
+		Name:  name,
+		Nodes: make(map[string]*DirectoryNode),
 	}
 }
 
@@ -17,22 +19,22 @@ func (p *DirectoryNode) CreateNodes(path []string) {
 		return
 	}
 
-	if p.nodes[path[0]] == nil {
-		newNode := NewDirectoryNode()
-		p.nodes[path[0]] = newNode
+	if p.Nodes[path[0]] == nil {
+		newNode := NewDirectoryNode(path[0])
+		p.Nodes[path[0]] = newNode
 	}
 
-	p.nodes[path[0]].CreateNodes(path[1:])
+	p.Nodes[path[0]].CreateNodes(path[1:])
 }
 
 func (p *DirectoryNode) PrintStructure(deep int) {
 	fmt.Println()
-	for element := range p.nodes {
+	for element := range p.Nodes {
 		for i := 0; i < deep; i++ {
 			fmt.Printf(" ")
 		}
 
 		fmt.Printf(element)
-		p.nodes[element].PrintStructure(deep + 1)
+		p.Nodes[element].PrintStructure(deep + 1)
 	}
 }
