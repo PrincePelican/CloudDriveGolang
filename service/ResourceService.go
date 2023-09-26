@@ -24,7 +24,13 @@ func NewResourceService(resourceRepository repository.ResourceRepository, storag
 
 func (service ResourceService) UploadResources(resource DTO.FileCreateForm) error {
 	var entity entity.ResourceEntity
+	parent, err := service.resourceRepository.GetResourceById(resource.ParentId)
+	if err != nil {
+		log.Fatalf("Finding parent error %s", err)
+	}
 
+	dirStructure := ConvertFromPathsToTreeStructure(resource.Paths, parent.Name)
+	resourceStructure := ConvertFromDirStructureToResourceTree(dirStructure)
 	for _, x := range resource.File {
 
 		entity.Key = (uuid.New()).String()
@@ -37,14 +43,17 @@ func (service ResourceService) UploadResources(resource DTO.FileCreateForm) erro
 		}
 
 		service.storageService.UplodadFileToBucket(file, entity.Key)
-		service.resourceRepository.CreateNewResource(entity)
+		service.resourceRepository.CreateNewResource(*resourceStructure)
 	}
 
 	return nil
 }
 
 func (service ResourceService) GetResourceById(id uint64) (*os.File, error) {
-	resource := service.resourceRepository.GetResourceById(id)
+	resource, err := service.resourceRepository.GetResourceById(id)
+	if err != nil {
+		log.Fatalf("Finding parent error %s", err)
+	}
 
 	file := service.storageService.DownloadFileFromBucket(resource)
 
@@ -70,7 +79,10 @@ func (service ResourceService) ChangeResource(entity entity.ResourceEntity, id u
 }
 
 func (service ResourceService) DeleteResource(id uint64) error {
-	resource := service.resourceRepository.GetResourceById(id)
+	resource, err := service.resourceRepository.GetResourceById(id)
+	if err != nil {
+		log.Fatalf("Finding parent error %s", err)
+	}
 	service.storageService.DeleteFileFromBucket(resource.Key)
 	service.resourceRepository.DeleteResource(id)
 

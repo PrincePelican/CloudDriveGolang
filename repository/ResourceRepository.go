@@ -17,11 +17,11 @@ func NewResourceRepository(db *gorm.DB) *ResourceRepository {
 	}
 }
 
-func (r *ResourceRepository) GetResourceById(id uint64) entity.ResourceEntity {
+func (r *ResourceRepository) GetResourceById(id uint64) (entity.ResourceEntity, error) {
 	var resource entity.ResourceEntity
-	r.db.Where("id = ?", id).First(&resource)
+	err := r.db.Where("id = ?", id).First(&resource).Error
 
-	return resource
+	return resource, err
 }
 
 func (r *ResourceRepository) CreateNewResource(entity entity.ResourceEntity) ([]entity.ResourceEntity, error) {
@@ -47,4 +47,10 @@ func (r *ResourceRepository) ChangeResource(entity entity.ResourceEntity, id uin
 func (r *ResourceRepository) DeleteResource(id uint64) error {
 	r.db.Delete(&entity.ResourceEntity{}, id)
 	return nil
+}
+
+func (r *ResourceRepository) GetAllChilds(id uint64) (entity.ResourceEntity, error) {
+	var entity entity.ResourceEntity
+	err := r.db.Model(entity).Preload("ResourceEntity").Where("id = ?", id).Error
+	return entity, err
 }

@@ -4,12 +4,8 @@ import (
 	"mime/multipart"
 )
 
-type FilesStructure struct {
-	DirectoryName string           `json:"name"`
-	Files         []string         `json:"files"`
-	Directory     []FilesStructure `json:"folders"`
-}
-
 type FileCreateForm struct {
-	File []*multipart.FileHeader `form:"file"`
+	File     []*multipart.FileHeader `form:"file"`
+	Paths    []string                `form:"paths"`
+	ParentId uint64                  `form:"parentId"`
 }

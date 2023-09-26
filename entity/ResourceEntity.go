@@ -18,8 +18,9 @@ func (ResourceEntity) TableName() string {
 type ResourceEntity struct {
 	gorm.Model
 	Name         string           `json:"name"`
-	Key          string           `json:"path" gorm:"unique"`
+	Key          string           `json:"key"`
 	ResourceType ResourceType     `json:"resourceType"`
 	Size         int64            `json:"size"`
-	Childs       []ResourceEntity `json:"childs"`
+	ParentId     int64            `json:"parentId" gorm:"default:null"`
+	Childs       []ResourceEntity `json:"childs" gorm:"foreignKey:ParentId;references:ID"`
 }
