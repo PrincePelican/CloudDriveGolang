@@ -4,7 +4,6 @@ import (
 	"cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/service"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -34,18 +33,18 @@ func (ctr ResourceController) InitRoutes() {
 func (ctr ResourceController) createNewResource(c *gin.Context) {
 	var newResource DTO.FileCreateForm
 	if err := c.ShouldBind(&newResource); err != nil {
-		log.Fatalf("error bind %s", err)
+		c.Error(err)
 	}
 
-	ctr.resourceService.UploadResources(newResource)
+	ctr.resourceService.UploadResources(c, newResource)
 
 	c.IndentedJSON(http.StatusCreated, gin.H{"message": "File Uploaded"})
 }
 
 func (ctr ResourceController) getAllResource(c *gin.Context) {
-	data, err := ctr.resourceService.GetAll()
+	data, err := ctr.resourceService.GetAll(c)
 	if err != nil {
-		log.Fatalf("error %s", err)
+		c.Error(err)
 	}
 	c.IndentedJSON(http.StatusOK, data)
 }
@@ -53,11 +52,11 @@ func (ctr ResourceController) getAllResource(c *gin.Context) {
 func (ctr ResourceController) getResourceById(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Fatalf("error id %s", err)
+		c.Error(err)
 	}
-	file, err := ctr.resourceService.GetResourceById(id)
+	file, err := ctr.resourceService.GetResourceById(c, id)
 	if err != nil {
-		log.Fatalf("error %s", err)
+		c.Error(err)
 	}
 
 	c.Header("Content-Disposition", "attachment; filename="+file.Name())
@@ -68,15 +67,15 @@ func (ctr ResourceController) getResourceById(c *gin.Context) {
 func (ctr ResourceController) PutResourceChange(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Fatalf("error id %s", err)
+		c.Error(err)
 	}
 	var changedResource entity.ResourceEntity
 	if err := c.BindJSON(&changedResource); err != nil {
-		log.Fatalf("error bind %s", err)
+		c.Error(err)
 	}
-	err = ctr.resourceService.ChangeResource(changedResource, id)
+	err = ctr.resourceService.ChangeResource(c, changedResource, id)
 	if err != nil {
-		log.Fatalf("error %s", err)
+		c.Error(err)
 	}
 
 	c.IndentedJSON(http.StatusAccepted, gin.H{"message": "File changed"})
@@ -85,10 +84,10 @@ func (ctr ResourceController) PutResourceChange(c *gin.Context) {
 func (ctr ResourceController) DeleteById(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.Fatalf("error id %s", err)
+		c.Error(err)
 	}
 
-	ctr.resourceService.DeleteResource(id)
+	ctr.resourceService.DeleteResource(c, id)
 
 	c.IndentedJSON(http.StatusOK, gin.H{"message": "File deleted"})
 }

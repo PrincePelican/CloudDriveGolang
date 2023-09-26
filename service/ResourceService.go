@@ -4,9 +4,9 @@ import (
 	"cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/repository"
-	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -22,11 +22,11 @@ func NewResourceService(resourceRepository repository.ResourceRepository, storag
 	}
 }
 
-func (service ResourceService) UploadResources(resource DTO.FileCreateForm) error {
+func (service ResourceService) UploadResources(c *gin.Context, resource DTO.FileCreateForm) error {
 	var entity entity.ResourceEntity
-	parent, err := service.resourceRepository.GetResourceById(resource.ParentId)
+	parent, err := service.resourceRepository.GetResourceById(c, resource.ParentId)
 	if err != nil {
-		log.Fatalf("Finding parent error %s", err)
+		c.Error(err)
 	}
 
 	dirStructure := ConvertFromPathsToTreeStructure(resource.Paths, parent.Name)
@@ -39,52 +39,52 @@ func (service ResourceService) UploadResources(resource DTO.FileCreateForm) erro
 
 		file, err := x.Open()
 		if err != nil {
-			log.Fatalf("File open error %s", err)
+			c.Error(err)
 		}
 
-		service.storageService.UplodadFileToBucket(file, entity.Key)
-		service.resourceRepository.CreateNewResource(*resourceStructure)
+		service.storageService.UplodadFileToBucket(c, file, entity.Key)
+		service.resourceRepository.CreateNewResource(c, *resourceStructure)
 	}
 
 	return nil
 }
 
-func (service ResourceService) GetResourceById(id uint64) (*os.File, error) {
-	resource, err := service.resourceRepository.GetResourceById(id)
+func (service ResourceService) GetResourceById(c *gin.Context, id uint64) (*os.File, error) {
+	resource, err := service.resourceRepository.GetResourceById(c, id)
 	if err != nil {
-		log.Fatalf("Finding parent error %s", err)
+		c.Error(err)
 	}
 
-	file := service.storageService.DownloadFileFromBucket(resource)
+	file := service.storageService.DownloadFileFromBucket(c, resource)
 
 	return file, nil
 }
 
-func (service ResourceService) GetAll() ([]entity.ResourceEntity, error) {
-	data, err := service.resourceRepository.GetAll()
+func (service ResourceService) GetAll(c *gin.Context) ([]entity.ResourceEntity, error) {
+	data, err := service.resourceRepository.GetAll(c)
 	if err != nil {
-		log.Fatalf("Service error %s", err)
+		c.Error(err)
 	}
 
 	return data, nil
 }
 
-func (service ResourceService) ChangeResource(entity entity.ResourceEntity, id uint64) error {
-	err := service.resourceRepository.ChangeResource(entity, id)
+func (service ResourceService) ChangeResource(c *gin.Context, entity entity.ResourceEntity, id uint64) error {
+	err := service.resourceRepository.ChangeResource(c, entity, id)
 	if err != nil {
-		log.Fatalf("Service error : %s", err)
+		c.Error(err)
 	}
 
 	return nil
 }
 
-func (service ResourceService) DeleteResource(id uint64) error {
-	resource, err := service.resourceRepository.GetResourceById(id)
+func (service ResourceService) DeleteResource(c *gin.Context, id uint64) error {
+	resource, err := service.resourceRepository.GetResourceById(c, id)
 	if err != nil {
-		log.Fatalf("Finding parent error %s", err)
+		c.Error(err)
 	}
-	service.storageService.DeleteFileFromBucket(resource.Key)
-	service.resourceRepository.DeleteResource(id)
+	service.storageService.DeleteFileFromBucket(c, resource.Key)
+	service.resourceRepository.DeleteResource(c, id)
 
 	return nil
 }

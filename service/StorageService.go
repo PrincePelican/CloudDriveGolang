@@ -4,13 +4,13 @@ import (
 	"cloud-service/entity"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/gin-gonic/gin"
 )
 
 type StorageService struct {
@@ -25,7 +25,7 @@ func NewStorageService() *StorageService {
 	}
 }
 
-func (s *StorageService) UplodadFileToBucket(file io.Reader, key string) {
+func (s *StorageService) UplodadFileToBucket(c *gin.Context, file io.Reader, key string) {
 
 	uploader := s3manager.NewUploader(s.session)
 
@@ -36,18 +36,18 @@ func (s *StorageService) UplodadFileToBucket(file io.Reader, key string) {
 	})
 
 	if err != nil {
-		log.Fatalf("Upload error %s", err)
+		c.Error(err)
 	}
 
 	fmt.Print(result)
 }
 
-func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) *os.File {
+func (s *StorageService) DownloadFileFromBucket(c *gin.Context, resource entity.ResourceEntity) *os.File {
 	downloader := s3manager.NewDownloader(s.session)
 
 	file, err := os.Create(resource.Name)
 	if err != nil {
-		fmt.Println(err)
+		c.Error(err)
 	}
 
 	defer file.Close()
@@ -58,14 +58,14 @@ func (s *StorageService) DownloadFileFromBucket(resource entity.ResourceEntity) 
 			Key:    aws.String(resource.Key),
 		})
 	if err != nil {
-		log.Fatalf("Download error %s", err)
+		c.Error(err)
 	}
 	fmt.Println("Downloaded bytes", result)
 
 	return file
 }
 
-func (s *StorageService) DeleteFileFromBucket(key string) {
+func (s *StorageService) DeleteFileFromBucket(c *gin.Context, key string) {
 	svc := s3.New(s.session)
 
 	result, err := svc.DeleteObject(&s3.DeleteObjectInput{
@@ -74,7 +74,7 @@ func (s *StorageService) DeleteFileFromBucket(key string) {
 	})
 
 	if err != nil {
-		log.Fatalf("Delete error %s", err)
+		c.Error(err)
 	}
 
 	fmt.Print(result)
