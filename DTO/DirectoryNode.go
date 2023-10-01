@@ -1,10 +1,14 @@
 package DTO
 
-import "fmt"
+import (
+	"cloud-service/entity"
+	"fmt"
+)
 
 type DirectoryNode struct {
-	Name  string
-	Nodes map[string]*DirectoryNode
+	Name         string
+	ResourceType entity.ResourceType
+	Nodes        map[string]*DirectoryNode
 }
 
 func NewDirectoryNode(name string) *DirectoryNode {
@@ -14,8 +18,17 @@ func NewDirectoryNode(name string) *DirectoryNode {
 	}
 }
 
+func NewFileNode(name string) *DirectoryNode {
+	return &DirectoryNode{
+		Name:         name,
+		ResourceType: entity.File,
+	}
+}
+
 func (p *DirectoryNode) CreateNodes(path []string) {
-	if len(path) == 0 {
+	if len(path) == 1 {
+		newNode := NewFileNode(path[0])
+		p.Nodes[path[0]] = newNode
 		return
 	}
 

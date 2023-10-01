@@ -3,6 +3,7 @@ package main
 import (
 	"cloud-service/controller"
 	"cloud-service/dbproperties"
+	errorhandler "cloud-service/errorHandler"
 	"cloud-service/repository"
 	"cloud-service/security"
 	"cloud-service/service"
@@ -21,6 +22,7 @@ func main() {
 	rscC := controller.NewResourceController(*rscS, router)
 	dbproperties.InitTables(db)
 	rscC.InitRoutes()
+	router.Use(errorhandler.ErrorHandler)
 
 	router.Run("0.0.0.0:8080")
 }
