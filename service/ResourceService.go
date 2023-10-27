@@ -4,10 +4,11 @@ import (
 	"cloud-service/DTO"
 	"cloud-service/entity"
 	"cloud-service/repository"
+	"cloud-service/validator"
+	"errors"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type ResourceService struct {
@@ -23,27 +24,25 @@ func NewResourceService(resourceRepository repository.ResourceRepository, storag
 }
 
 func (service ResourceService) UploadResources(c *gin.Context, resource DTO.FileCreateForm) error {
-	var entity entity.ResourceEntity
+	if validator.ValidateFileCreateForm(resource.Files, resource.Paths) {
+		c.Error(errors.New("Validate: FileCreateForm inncorect"))
+	}
 	parent, err := service.resourceRepository.GetResourceById(c, resource.ParentId)
 	if err != nil {
 		c.Error(err)
 	}
 
-	dirStructure := ConvertFromPathsToTreeStructure(resource.Paths, parent.Name)
+	dirStructure, keys := ConvertFromPathsToTreeStructure(resource.Paths, parent.Name)
 	resourceStructure := ConvertFromDirStructureToResourceTree(dirStructure)
-	for _, x := range resource.File {
 
-		entity.Key = (uuid.New()).String()
-		entity.Name = x.Filename
-		entity.Size = x.Size
+	service.resourceRepository.CreateNewResource(c, *resourceStructure)
 
-		file, err := x.Open()
+	for index, file := range resource.Files {
+		opened, err := file.Open()
 		if err != nil {
 			c.Error(err)
 		}
-
-		service.storageService.UplodadFileToBucket(c, file, entity.Key)
-		service.resourceRepository.CreateNewResource(c, *resourceStructure)
+		service.storageService.UplodadFileToBucket(c, opened, keys[index])
 	}
 
 	return nil

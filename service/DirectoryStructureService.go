@@ -4,16 +4,15 @@ import (
 	"cloud-service/DTO"
 	"cloud-service/entity"
 	"strings"
-
-	"github.com/google/uuid"
 )
 
-func ConvertFromPathsToTreeStructure(paths []string, DirName string) *DTO.DirectoryNode {
+func ConvertFromPathsToTreeStructure(paths []string, DirName string) (*DTO.DirectoryNode, []string) {
 	var structure = DTO.NewDirectoryNode(DirName)
+	keys := make([]string, 0)
 	for _, x := range paths {
-		structure.CreateNodes(strings.Split(x, "/"))
+		structure.CreateNodes(strings.Split(x, "/"), &keys)
 	}
-	return structure
+	return structure, keys
 }
 
 func ConvertFromDirStructureToResourceTree(dirStructure *DTO.DirectoryNode) *entity.ResourceEntity {
@@ -31,13 +30,9 @@ func createChildFromResource(dirParent DTO.DirectoryNode, parentEntity *entity.R
 }
 
 func createEntityFromDirNode(dirNode DTO.DirectoryNode) *entity.ResourceEntity {
-	key := ""
-	if dirNode.ResourceType == entity.File {
-		key = (uuid.New()).String()
-	}
 	return &entity.ResourceEntity{
 		Name:         dirNode.Name,
-		Key:          key,
+		Key:          dirNode.Key,
 		ResourceType: entity.Container,
 		Size:         0,
 		Childs:       []entity.ResourceEntity{},

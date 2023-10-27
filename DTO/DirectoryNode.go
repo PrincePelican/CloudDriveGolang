@@ -3,12 +3,15 @@ package DTO
 import (
 	"cloud-service/entity"
 	"fmt"
+
+	"github.com/google/uuid"
 )
 
 type DirectoryNode struct {
 	Name         string
 	ResourceType entity.ResourceType
 	Nodes        map[string]*DirectoryNode
+	Key          string
 }
 
 func NewDirectoryNode(name string) *DirectoryNode {
@@ -18,16 +21,19 @@ func NewDirectoryNode(name string) *DirectoryNode {
 	}
 }
 
-func NewFileNode(name string) *DirectoryNode {
+func NewFileNode(name string, keys *[]string) *DirectoryNode {
+	key := (uuid.New()).String()
+	*keys = append(*keys, key)
 	return &DirectoryNode{
 		Name:         name,
 		ResourceType: entity.File,
+		Key:          key,
 	}
 }
 
-func (p *DirectoryNode) CreateNodes(path []string) {
+func (p *DirectoryNode) CreateNodes(path []string, keys *[]string) {
 	if len(path) == 1 {
-		newNode := NewFileNode(path[0])
+		newNode := NewFileNode(path[0], keys)
 		p.Nodes[path[0]] = newNode
 		return
 	}
@@ -37,7 +43,7 @@ func (p *DirectoryNode) CreateNodes(path []string) {
 		p.Nodes[path[0]] = newNode
 	}
 
-	p.Nodes[path[0]].CreateNodes(path[1:])
+	p.Nodes[path[0]].CreateNodes(path[1:], keys)
 }
 
 func (p *DirectoryNode) PrintStructure(deep int) {
