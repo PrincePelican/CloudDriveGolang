@@ -45,13 +45,14 @@ func (r *ResourceRepository) ChangeResource(c *gin.Context, entity entity.Resour
 	return nil
 }
 
-func (r *ResourceRepository) DeleteResource(c *gin.Context, id uint64) error {
-	r.db.Delete(&entity.ResourceEntity{}, id)
-	return nil
+func (r *ResourceRepository) DeleteResource(c *gin.Context, resource *entity.ResourceEntity) error {
+	err := r.db.Delete(resource).Error
+	return err
 }
 
-func (r *ResourceRepository) GetAllChilds(c *gin.Context, id uint64) (entity.ResourceEntity, error) {
-	var entity entity.ResourceEntity
-	err := r.db.Model(entity).Preload("ResourceEntity").Where("id = ?", id).Error
-	return entity, err
+func (r *ResourceRepository) GetAllChilds(c *gin.Context, resource *entity.ResourceEntity) {
+	r.db.Model(resource).Preload("Childs").Where("parent_id = ?", resource.ID).Find(&resource.Childs)
+	for i := range resource.Childs {
+		r.GetAllChilds(c, &resource.Childs[i])
+	}
 }

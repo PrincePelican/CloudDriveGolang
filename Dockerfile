@@ -10,6 +10,7 @@ ENV DbPort="5432"
 ENV DbName="postgres"
 ENV DbUser="postgres"
 ENV DbPassword="admin"
+ENV TmpFolder = "tmp"
 
 COPY go.mod . 
 COPY go.sum .

@@ -5,6 +5,7 @@ import (
 	"cloud-service/entity"
 	"cloud-service/service"
 	"net/http"
+	"path/filepath"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -54,14 +55,14 @@ func (ctr ResourceController) getResourceById(c *gin.Context) {
 	if err != nil {
 		c.Error(err)
 	}
-	file, err := ctr.resourceService.GetResourceById(c, id)
+	filePath, err := ctr.resourceService.GetResourceById(c, id)
 	if err != nil {
 		c.Error(err)
 	}
 
-	c.Header("Content-Disposition", "attachment; filename="+file.Name())
+	c.Header("Content-Disposition", "attachment; filename="+filepath.Base(filePath))
 	c.Header("Content-Type", "application/octet-stream")
-	c.File(file.Name())
+	c.File(filePath)
 }
 
 func (ctr ResourceController) PutResourceChange(c *gin.Context) {

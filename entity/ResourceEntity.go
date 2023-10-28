@@ -22,5 +22,5 @@ type ResourceEntity struct {
 	ResourceType ResourceType     `json:"resourceType"`
 	Size         int64            `json:"size"`
 	ParentId     int64            `json:"parentId" gorm:"default:null"`
-	Childs       []ResourceEntity `json:"childs" gorm:"foreignKey:ParentId;references:ID"`
+	Childs       []ResourceEntity `json:"childs" gorm:"foreignKey:ParentId;constraint:OnDelete:CASCADE"`
 }

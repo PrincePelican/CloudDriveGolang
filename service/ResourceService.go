@@ -2,24 +2,27 @@ package service
 
 import (
 	"cloud-service/DTO"
+	"cloud-service/converter"
 	"cloud-service/entity"
 	"cloud-service/repository"
 	"cloud-service/validator"
 	"errors"
-	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type ResourceService struct {
-	resourceRepository repository.ResourceRepository
-	storageService     StorageService
+	resourceRepository       repository.ResourceRepository
+	storageService           StorageService
+	downloadDirectorySerivce DownloadDirectorySerivce
 }
 
-func NewResourceService(resourceRepository repository.ResourceRepository, storageService StorageService) *ResourceService {
+func NewResourceService(resourceRepository repository.ResourceRepository, storageService StorageService, downloadDirectorySerivce DownloadDirectorySerivce) *ResourceService {
 	return &ResourceService{
-		resourceRepository: resourceRepository,
-		storageService:     storageService,
+		resourceRepository:       resourceRepository,
+		storageService:           storageService,
+		downloadDirectorySerivce: downloadDirectorySerivce,
 	}
 }
 
@@ -48,15 +51,21 @@ func (service ResourceService) UploadResources(c *gin.Context, resource DTO.File
 	return nil
 }
 
-func (service ResourceService) GetResourceById(c *gin.Context, id uint64) (*os.File, error) {
+func (service ResourceService) GetResourceById(c *gin.Context, id uint64) (string, error) {
 	resource, err := service.resourceRepository.GetResourceById(c, id)
+	service.resourceRepository.GetAllChilds(c, &resource)
 	if err != nil {
 		c.Error(err)
 	}
 
-	file := service.storageService.DownloadFileFromBucket(c, resource)
+	startDirectory := (uuid.New()).String()
+	service.downloadDirectorySerivce.CreateFilesAndFolderFromResource(c, &resource, startDirectory)
+	filepath, err := converter.ZipDir(startDirectory, startDirectory)
+	if err != nil {
+		c.Error(err)
+	}
 
-	return file, nil
+	return filepath, err
 }
 
 func (service ResourceService) GetAll(c *gin.Context) ([]entity.ResourceEntity, error) {
@@ -82,8 +91,28 @@ func (service ResourceService) DeleteResource(c *gin.Context, id uint64) error {
 	if err != nil {
 		c.Error(err)
 	}
-	service.storageService.DeleteFileFromBucket(c, resource.Key)
-	service.resourceRepository.DeleteResource(c, id)
+	service.resourceRepository.GetAllChilds(c, &resource)
+	err = service.DeleteResouceRecursive(c, &resource)
+	if err != nil {
+		c.Error(err)
+	}
+	return err
+}
 
-	return nil
+func (service ResourceService) DeleteResouceRecursive(c *gin.Context, resource *entity.ResourceEntity) error {
+	for _, child := range resource.Childs {
+		err := service.DeleteResouceRecursive(c, &child)
+		if err != nil {
+			c.Error(err)
+		}
+	}
+
+	if len(resource.Key) != 0 {
+		service.storageService.DeleteFileFromBucket(c, resource.Key)
+	}
+	err := service.resourceRepository.DeleteResource(c, resource)
+	if err != nil {
+		c.Error(err)
+	}
+	return err
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -42,10 +43,10 @@ func (s *StorageService) UplodadFileToBucket(c *gin.Context, file io.Reader, key
 	fmt.Print(result)
 }
 
-func (s *StorageService) DownloadFileFromBucket(c *gin.Context, resource entity.ResourceEntity) *os.File {
+func (s *StorageService) DownloadFileFromBucket(c *gin.Context, resource entity.ResourceEntity, path string) *os.File {
 	downloader := s3manager.NewDownloader(s.session)
 
-	file, err := os.Create(resource.Name)
+	file, err := os.Create(filepath.Join(path, resource.Name))
 	if err != nil {
 		c.Error(err)
 	}
