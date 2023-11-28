@@ -7,9 +7,11 @@ import (
 )
 
 func isFilePathValid(path string) bool {
-	filePattern := `^([a-zA-Z]:)?(\\[^<>:"/\\|?*]+)+\\?$`
-	regex := regexp.MustCompile(filePattern)
-	return regex.MatchString(path)
+	r1 := regexp.MustCompile(`^/`)
+	r2 := regexp.MustCompile(`/$`)
+	r3 := regexp.MustCompile(`/\.\./`)
+	r4 := regexp.MustCompile(`\\`)
+	return !r1.MatchString(path) && !r2.MatchString(path) && !r3.MatchString(path) && !r4.MatchString(path)
 }
 
 func isFilesMatchingPaths(files []*multipart.FileHeader, paths []string) bool {
