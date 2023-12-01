@@ -33,7 +33,7 @@ func createEntityFromDirNode(dirNode DTO.DirectoryNode) *entity.ResourceEntity {
 	return &entity.ResourceEntity{
 		Name:         dirNode.Name,
 		Key:          dirNode.Key,
-		ResourceType: entity.Container,
+		ResourceType: dirNode.ResourceType,
 		Size:         0,
 		Childs:       []entity.ResourceEntity{},
 	}

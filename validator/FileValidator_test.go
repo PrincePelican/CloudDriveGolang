@@ -8,8 +8,8 @@ import (
 func TestIsFilePathValidWhenFullPath(t *testing.T) {
 	expected := true
 	path := "good/valid/test.txt"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be valid", path)
 	}
 }
@@ -17,8 +17,8 @@ func TestIsFilePathValidWhenFullPath(t *testing.T) {
 func TestIsFilePathValidWhenSingleFile(t *testing.T) {
 	expected := true
 	path := "test.txt"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be valid", path)
 	}
 }
@@ -26,8 +26,8 @@ func TestIsFilePathValidWhenSingleFile(t *testing.T) {
 func TestIsFilePathInvalid(t *testing.T) {
 	expected := false
 	path := "/bad/text.txt"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be invalid", path)
 	}
 }
@@ -35,8 +35,8 @@ func TestIsFilePathInvalid(t *testing.T) {
 func TestIsFilePathInvalidWithoutFileExtention(t *testing.T) {
 	expected := false
 	path := "/path"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be invalid", path)
 	}
 }
@@ -44,8 +44,8 @@ func TestIsFilePathInvalidWithoutFileExtention(t *testing.T) {
 func TestIsFilePathInvalidWithDots(t *testing.T) {
 	expected := false
 	path := "/../path.txt"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be invalid", path)
 	}
 }
@@ -53,8 +53,8 @@ func TestIsFilePathInvalidWithDots(t *testing.T) {
 func TestIsFilePathInvalidWithOtherSlashes(t *testing.T) {
 	expected := false
 	path := "\\path.txt"
-	isValid := isFilePathValid(path)
-	if isValid != expected {
+	actual := isFilePathValid(path)
+	if actual != expected {
 		t.Errorf("path:%s should be invalid", path)
 	}
 }
@@ -69,8 +69,8 @@ func TestSingleCorrectValidateFileCreateForm(t *testing.T) {
 	}
 	paths := []string{path}
 	files := []*multipart.FileHeader{fileHeader}
-	isValid := ValidateFileCreateForm(files, paths)
-	if isValid != expected {
+	actual := ValidateFileCreateForm(files, paths)
+	if actual != expected {
 		t.Errorf("fileNames:%s paths:%s should be valid", fileName, path)
 	}
 }
@@ -86,8 +86,8 @@ func TestDoublePathsOneFileNameValidateFileCreateForm(t *testing.T) {
 	}
 	paths := []string{path1, path2}
 	files := []*multipart.FileHeader{fileHeader}
-	isValid := ValidateFileCreateForm(files, paths)
-	if isValid != expected {
+	actual := ValidateFileCreateForm(files, paths)
+	if actual != expected {
 		t.Errorf("fileNames:%s paths:%s %s should be invalid", fileName, path1, path2)
 	}
 }
@@ -107,8 +107,8 @@ func TestOnePathsDoubleFileNameValidateFileCreateForm(t *testing.T) {
 	}
 	paths := []string{path}
 	files := []*multipart.FileHeader{fileHeader1, fileHeader2}
-	isValid := ValidateFileCreateForm(files, paths)
-	if isValid != expected {
+	actual := ValidateFileCreateForm(files, paths)
+	if actual != expected {
 		t.Errorf("fileNames:%s %s paths:%s should be invalid", fileName1, fileName2, path)
 	}
 }
@@ -123,8 +123,8 @@ func TestInvalidSingleValidateFileCreateForm(t *testing.T) {
 	}
 	paths := []string{path}
 	files := []*multipart.FileHeader{fileHeader}
-	isValid := ValidateFileCreateForm(files, paths)
-	if isValid != expected {
+	actual := ValidateFileCreateForm(files, paths)
+	if actual != expected {
 		t.Errorf("fileNames:%s paths:%s should be invalid", fileName, path)
 	}
 }
@@ -145,8 +145,8 @@ func TestValidDoublePathsDoubleFileNameValidateFileCreateForm(t *testing.T) {
 	}
 	paths := []string{path1, path2}
 	files := []*multipart.FileHeader{fileHeader1, fileHeader2}
-	isValid := ValidateFileCreateForm(files, paths)
-	if isValid != expected {
+	actual := ValidateFileCreateForm(files, paths)
+	if actual != expected {
 		t.Errorf("fileNames:%s %s paths:%s %s should be valid", fileName1, fileName2, path1, path2)
 	}
 }
