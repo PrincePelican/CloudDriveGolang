@@ -24,11 +24,11 @@ func NewResourceController(resourceService service.ResourceService, router *gin.
 }
 
 func (ctr ResourceController) InitRoutes() {
-	ctr.router.GET("/resources/all", ctr.getAllResource)
+	ctr.router.GET("/resources", ctr.getAllResource)
 	ctr.router.GET("/resources/:id", ctr.getResourceById)
-	ctr.router.PUT("/resources/change/:id", ctr.PutResourceChange)
-	ctr.router.POST("/resources/create", ctr.createNewResource)
-	ctr.router.DELETE("/resources/delete/:id", ctr.DeleteById)
+	ctr.router.PUT("/resources/:id", ctr.PutResourceChange)
+	ctr.router.POST("/resources", ctr.createNewResource)
+	ctr.router.DELETE("/resources/:id", ctr.DeleteById)
 }
 
 func (ctr ResourceController) createNewResource(c *gin.Context) {

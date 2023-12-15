@@ -30,7 +30,7 @@ func (service ResourceService) UploadResources(c *gin.Context, resource DTO.File
 	if validator.ValidateFileCreateForm(resource.Files, resource.Paths) {
 		c.Error(errors.New("Validate: FileCreateForm inncorect"))
 	}
-	parent, err := service.resourceRepository.GetResourceById(c, resource.ParentId)
+	parent, err := service.resourceRepository.GetResourceById(resource.ParentId)
 	if err != nil {
 		c.Error(err)
 	}
@@ -38,7 +38,7 @@ func (service ResourceService) UploadResources(c *gin.Context, resource DTO.File
 	dirStructure, keys := ConvertFromPathsToTreeStructure(resource.Paths, parent.Name)
 	resourceStructure := ConvertFromDirStructureToResourceTree(dirStructure)
 
-	service.resourceRepository.CreateNewResource(c, *resourceStructure)
+	service.resourceRepository.CreateNewResource(*resourceStructure)
 
 	for index, file := range resource.Files {
 		opened, err := file.Open()
@@ -52,8 +52,8 @@ func (service ResourceService) UploadResources(c *gin.Context, resource DTO.File
 }
 
 func (service ResourceService) GetResourceById(c *gin.Context, id uint64) (string, error) {
-	resource, err := service.resourceRepository.GetResourceById(c, id)
-	service.resourceRepository.GetAllChilds(c, &resource)
+	resource, err := service.resourceRepository.GetResourceById(id)
+	service.resourceRepository.GetAllChilds(&resource)
 	if err != nil {
 		c.Error(err)
 	}
@@ -69,7 +69,7 @@ func (service ResourceService) GetResourceById(c *gin.Context, id uint64) (strin
 }
 
 func (service ResourceService) GetAll(c *gin.Context) ([]entity.ResourceEntity, error) {
-	data, err := service.resourceRepository.GetAll(c)
+	data, err := service.resourceRepository.GetAll()
 	if err != nil {
 		c.Error(err)
 	}
@@ -78,7 +78,7 @@ func (service ResourceService) GetAll(c *gin.Context) ([]entity.ResourceEntity, 
 }
 
 func (service ResourceService) ChangeResource(c *gin.Context, entity entity.ResourceEntity, id uint64) error {
-	err := service.resourceRepository.ChangeResource(c, entity, id)
+	_, err := service.resourceRepository.ChangeResource(entity, id)
 	if err != nil {
 		c.Error(err)
 	}
@@ -87,11 +87,11 @@ func (service ResourceService) ChangeResource(c *gin.Context, entity entity.Reso
 }
 
 func (service ResourceService) DeleteResource(c *gin.Context, id uint64) error {
-	resource, err := service.resourceRepository.GetResourceById(c, id)
+	resource, err := service.resourceRepository.GetResourceById(id)
 	if err != nil {
 		c.Error(err)
 	}
-	service.resourceRepository.GetAllChilds(c, &resource)
+	service.resourceRepository.GetAllChilds(&resource)
 	err = service.DeleteResouceRecursive(c, &resource)
 	if err != nil {
 		c.Error(err)
@@ -110,7 +110,7 @@ func (service ResourceService) DeleteResouceRecursive(c *gin.Context, resource *
 	if len(resource.Key) != 0 {
 		service.storageService.DeleteFileFromBucket(c, resource.Key)
 	}
-	err := service.resourceRepository.DeleteResource(c, resource)
+	err := service.resourceRepository.DeleteResource(resource)
 	if err != nil {
 		c.Error(err)
 	}
